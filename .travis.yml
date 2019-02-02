@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t studentaleksandr/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run studentaleksandr/react-test yarn test --coverage
+
+after_success:
+  - docker build -t studentaleksandr/complexapp-client ./client
+  - docker build -t studentaleksandr/complexapp-server ./server
+  - docker build -t studentaleksandr/complexapp-worker ./worker
+  - docker build -t studentaleksandr/complexapp-nginx ./nginx
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push studentaleksandr/complexapp-client
+  - docker push studentaleksandr/complexapp-server
+  - docker push studentaleksandr/complexapp-worker
+  - docker push studentaleksandr/complexapp-nginx
